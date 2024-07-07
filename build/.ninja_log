@@ -1,0 +1,6 @@
+# ninja log v6
+1	23	1720266780684367799	CMakeFiles/CubeSky.dir/src/tasks.c.o	368d6557c967dd3f
+1	136	1720270324804196066	CMakeFiles/CubeSky.dir/src/main.c.o	36ba07f7561408cf
+2	182	1720312487210295658	CMakeFiles/CubeSky.dir/src/server.c.o	925ca7759ef97ae5
+62	155	1720266881274361895	CubeSky	5d0bd22f1bd58fa
+0	65	1720311696170302140	CMakeFiles/CubeSky.dir/src/setting.c.o	e0b40c6a2c581b9f
