@@ -1,6 +1,7 @@
 {
     "files.associations": {
         "server.h": "c",
-        "event.h": "c"
+        "event.h": "c",
+        "datatypes.h": "c"
     }
 }

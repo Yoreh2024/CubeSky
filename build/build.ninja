@@ -56,6 +56,20 @@ build CMakeFiles/CubeSky.dir/src/main.c.o: C_COMPILER__CubeSky_unscanned_Debug /
   OBJECT_DIR = CMakeFiles/CubeSky.dir
   OBJECT_FILE_DIR = CMakeFiles/CubeSky.dir/src
 
+build CMakeFiles/CubeSky.dir/src/datatypes.c.o: C_COMPILER__CubeSky_unscanned_Debug /home/Yoreh/Code/CubeSky/src/datatypes.c || cmake_object_order_depends_target_CubeSky
+  DEP_FILE = CMakeFiles/CubeSky.dir/src/datatypes.c.o.d
+  FLAGS = -g
+  INCLUDES = -I/home/Yoreh/Code/CubeSky/include
+  OBJECT_DIR = CMakeFiles/CubeSky.dir
+  OBJECT_FILE_DIR = CMakeFiles/CubeSky.dir/src
+
+build CMakeFiles/CubeSky.dir/src/game_login.c.o: C_COMPILER__CubeSky_unscanned_Debug /home/Yoreh/Code/CubeSky/src/game_login.c || cmake_object_order_depends_target_CubeSky
+  DEP_FILE = CMakeFiles/CubeSky.dir/src/game_login.c.o.d
+  FLAGS = -g
+  INCLUDES = -I/home/Yoreh/Code/CubeSky/include
+  OBJECT_DIR = CMakeFiles/CubeSky.dir
+  OBJECT_FILE_DIR = CMakeFiles/CubeSky.dir/src
+
 build CMakeFiles/CubeSky.dir/src/server.c.o: C_COMPILER__CubeSky_unscanned_Debug /home/Yoreh/Code/CubeSky/src/server.c || cmake_object_order_depends_target_CubeSky
   DEP_FILE = CMakeFiles/CubeSky.dir/src/server.c.o.d
   FLAGS = -g
@@ -85,8 +99,9 @@ build CMakeFiles/CubeSky.dir/src/tasks.c.o: C_COMPILER__CubeSky_unscanned_Debug 
 #############################################
 # Link the executable CubeSky
 
-build CubeSky: C_EXECUTABLE_LINKER__CubeSky_Debug CMakeFiles/CubeSky.dir/src/main.c.o CMakeFiles/CubeSky.dir/src/server.c.o CMakeFiles/CubeSky.dir/src/setting.c.o CMakeFiles/CubeSky.dir/src/tasks.c.o
+build CubeSky: C_EXECUTABLE_LINKER__CubeSky_Debug CMakeFiles/CubeSky.dir/src/main.c.o CMakeFiles/CubeSky.dir/src/datatypes.c.o CMakeFiles/CubeSky.dir/src/game_login.c.o CMakeFiles/CubeSky.dir/src/server.c.o CMakeFiles/CubeSky.dir/src/setting.c.o CMakeFiles/CubeSky.dir/src/tasks.c.o
   FLAGS = -g
+  LINK_LIBRARIES = -levent
   OBJECT_DIR = CMakeFiles/CubeSky.dir
   POST_BUILD = :
   PRE_LINK = :

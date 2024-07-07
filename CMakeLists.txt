@@ -9,10 +9,10 @@ set(CMAKE_TOOLCHAIN_FILE "/root/vcpkg/scripts/buildsystems/vcpkg.cmake" CACHE FI
 
 # 查找 libevent
 find_package(Libevent CONFIG REQUIRED)
-target_link_libraries(CubeSky PRIVATE event)
 
 # 添加执行文件目标
 add_executable(${PROJECT_NAME} src/main.c)
+target_link_libraries(CubeSky PRIVATE event)
 
 # 自动包含 src 目录下的所有 .c 文件
 file(GLOB_RECURSE SRC_FILES "src/*.c")
