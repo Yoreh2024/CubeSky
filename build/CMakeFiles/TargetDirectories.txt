@@ -1,3 +1,0 @@
-/home/Yoreh/Code/CubeSky/build/CMakeFiles/CubeSky.dir
-/home/Yoreh/Code/CubeSky/build/CMakeFiles/edit_cache.dir
-/home/Yoreh/Code/CubeSky/build/CMakeFiles/rebuild_cache.dir
