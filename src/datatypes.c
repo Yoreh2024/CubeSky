@@ -1,12 +1,12 @@
 #include "datatypes.h"
 
-uint8_t varint_decode(char* buf, uint8_t len, int32_t* out) {
+bool varint_decode(char* buf, uint8_t len, int32_t* out) {
     int32_t value = 0;
     uint8_t shift = 0;
     char* end = buf + len;
     for(char* ptr = buf; ptr < end; ++ptr){
         if (shift >= 32) {
-            return 0;
+            return false;
         }
         unsigned char b = *ptr;
         value |= ((uint32_t)(b & 0x7F)) << shift;
@@ -14,16 +14,16 @@ uint8_t varint_decode(char* buf, uint8_t len, int32_t* out) {
         shift += 7;
     }
     *out = value;
-    return 1;
+    return true;
 }
 
-uint8_t varlong_decode(char* buf, uint8_t len, int64_t* out) {
+bool varlong_decode(char* buf, uint8_t len, int64_t* out) {
     int64_t value = 0;
     uint8_t shift = 0;
     char* end = buf + len;
     for(char* ptr = buf; ptr < end; ++ptr){
         if (shift >= 64) {
-            return 0;
+            return false;
         }
         unsigned char b = *ptr;
         value |= ((uint64_t)(b & 0x7F)) << shift;
@@ -31,5 +31,13 @@ uint8_t varlong_decode(char* buf, uint8_t len, int64_t* out) {
         shift += 7;
     }
     *out = value;
-    return 1;
+    return true;
+}
+
+bool hex_decode(const uint8_t *data, uint8_t length, char* hex_str) {
+    for (uint8_t i = 0; i < length; i++) {
+        sprintf(&hex_str[i * 2], "%02X", data[i]);
+    }
+    hex_str[length * 2] = '\0';
+    return true;
 }

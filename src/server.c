@@ -1,12 +1,21 @@
 #include "server.h"
 void event_read(struct bufferevent *bev, void *arg) {  
-    char buf[1024]={0};
+    char buf[1024];
     uint8_t tmplen = bufferevent_read(bev, buf, 5);
+    buf[tmplen] = '\0';
+
     int32_t len;
     varint_decode(buf, tmplen, &len);
-    printf("%d#%d\n", tmplen, len);
-   
-    printf("\n");  
+    char* buf_ptr = buf + tmplen - len;
+
+    if(len > 5-(tmplen-len)){
+        bufferevent_read(bev, buf, (1024<len)? 1024: len);
+    }
+
+    char hex_buf[2048];
+    hex_decode(buf_ptr, len, hex_buf);
+
+    printf("%s\n", hex_buf);
 }
 
 void event_write(struct bufferevent *bev, void *data){
