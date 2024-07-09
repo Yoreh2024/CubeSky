@@ -12,11 +12,11 @@
 #include "datatypes.h"
 
 // 当从客户端读取到数据时调用的回调函数
-void event_read(struct bufferevent *bev, void *data);
+void event_read(struct bufferevent *bev, void* client_data);
 // 成功向客户端发送数据时调用的回调函数
-void event_write(struct bufferevent *bev, void *data);
+void event_write(struct bufferevent *bev, void* client_data);
 // 当发生错误或其他事件时调用的回调函数
-void event_other(struct bufferevent *bev, short events, void *data);
+void event_other(struct bufferevent *bev, short events, void* client_data);
 //监听客户端发给服务器的消息
 int server_listen(void);
 //关闭服务器

@@ -132,7 +132,13 @@
                     "type":"Uint",
                     "value":2
                 },
-                "NextState":"VarIntEnum"
+                "NextState":{
+                    "type":"Enum",
+                    "value":{  
+                        "type":"VarInt",
+                        "value":5
+                    }
+                }
             },
             "FE":{
                 "Payload":{

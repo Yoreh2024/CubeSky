@@ -11,6 +11,7 @@ set(CMAKE_TOOLCHAIN_FILE "/root/vcpkg/scripts/buildsystems/vcpkg.cmake" CACHE FI
 add_executable(${PROJECT_NAME} src/main.c)
 target_link_libraries(CubeSky PRIVATE event)
 target_link_libraries(CubeSky PRIVATE yyjson)
+target_link_libraries(CubeSky PRIVATE mimalloc)
 
 # 自动包含 src 目录下的所有 .c 文件
 file(GLOB_RECURSE SRC_FILES "src/*.c")

@@ -1,28 +1,52 @@
 #include "server.h"
-void event_read(struct bufferevent *bev, void *arg) {  
-    char buf[1024];
-    uint8_t tmplen = bufferevent_read(bev, buf, 5);
-    buf[tmplen] = '\0';
+void event_read(struct bufferevent* bev, void* client_data) {
+    //struct ClientData* data = client_data;
+    printf("#%p:%d\n",client_data,*((int*)client_data));
+    //struct evbuffer *input = bufferevent_get_input(bev);
 
-    int32_t len;
-    varint_decode(buf, tmplen, &len);
-    char* buf_ptr = buf + tmplen - len;
+    /*printf("#：%d\n",data->connect.message_length);
 
-    if(len > 5-(tmplen-len)){
-        bufferevent_read(bev, buf, (1024<len)? 1024: len);
+    if(data->connect.message_length == 0){
+        printf("***\n");
+        char tmpbuf_datalen[5];
+        ssize_t tmp = evbuffer_copyout(input, tmpbuf_datalen, 5);
+        uint32_t datalen = 0;
+        uint8_t tmp1 = varint_decode(tmpbuf_datalen, tmp, &datalen);
+        printf("数据长度：%d\n", datalen);
+        evbuffer_drain(input, tmp1);
+        
+        if(evbuffer_get_length(input) < datalen){
+            if(!(1 < datalen < MAX_DATALEN)){
+                printf("数据长度不合法\n");
+                bufferevent_flush(bev, EV_READ, BEV_FLUSH);
+                data->connect.message_length = 0;
+                bufferevent_setwatermark(bev, EV_READ, 0, 0);
+                return;
+            }
+
+            bufferevent_setwatermark(bev, EV_READ, datalen, 0);
+            data->connect.message_length = datalen;
+            return;
+        }
     }
 
-    char hex_buf[2048];
-    hex_decode(buf_ptr, len, hex_buf);
+    printf("总数据长度：%d",data->connect.message_length);
 
-    printf("%s\n", hex_buf);
+    char* buf = (char*)mi_malloc(data->connect.message_length);
+    char tmp[2048];
+    hex_decode(buf, data->connect.message_length, tmp);
+    mi_free(buf);
+
+    printf("收到客户端发来的数据：%s\n", tmp);
+    
+    bufferevent_setwatermark(bev, EV_READ, 0, 0);*/
 }
 
-void event_write(struct bufferevent *bev, void *data){
+void event_write(struct bufferevent* bev, void* client_data){
     printf("成功将数据写给客户端\n");
 }
 
-void event_other(struct bufferevent *bev, short events, void *data){
+void event_other(struct bufferevent* bev, short events, void* client_data){
     if (events & BEV_EVENT_EOF)
     {
         printf("connection closed\n");  
@@ -39,9 +63,19 @@ void event_other(struct bufferevent *bev, short events, void *data){
 void cb_listener(struct evconnlistener *listener, evutil_socket_t fd, struct sockaddr *addr, int len, void *ptr){
     struct event_base* base=(struct event_base*)ptr;
     struct bufferevent* bev = bufferevent_socket_new(base,fd,BEV_OPT_CLOSE_ON_FREE);
+
+    struct ClientData client_data;
+    memset(&client_data, 0, sizeof(client_data));
+
+    int* a = mi_malloc(sizeof(int));
+    *a = 13;
     
-    bufferevent_setcb(bev,event_read,event_write,event_other,NULL);
+    printf("$%p:%d\n",a,*a);
+    bufferevent_setcb(bev, event_read, event_write, event_other, a);
+
     bufferevent_enable(bev, EV_READ);
+
+    mi_free(a);
     return ;
 }
 
@@ -61,8 +95,4 @@ int server_listen(){
     event_base_free(base);
 
     return 0;
-}
-
-int server_close(void){
-
 }

@@ -3,5 +3,5 @@
 #include "tasks.h"
 #include "common.h"
 
-int server_start(void);
+int server_init(void);
 int server_setting(void);

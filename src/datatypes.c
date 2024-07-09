@@ -1,10 +1,11 @@
 #include "datatypes.h"
 
-bool varint_decode(char* buf, uint8_t len, int32_t* out) {
+uint8_t varint_decode(char* buf, uint8_t len, int32_t* out) {
     int32_t value = 0;
     uint8_t shift = 0;
+    char* ptr = buf;
     char* end = buf + len;
-    for(char* ptr = buf; ptr < end; ++ptr){
+    for( ; ptr < end; ++ptr){
         if (shift >= 32) {
             return false;
         }
@@ -14,14 +15,15 @@ bool varint_decode(char* buf, uint8_t len, int32_t* out) {
         shift += 7;
     }
     *out = value;
-    return true;
+    return (ptr-buf);
 }
 
-bool varlong_decode(char* buf, uint8_t len, int64_t* out) {
+uint8_t varlong_decode(char* buf, uint8_t len, int64_t* out) {
     int64_t value = 0;
     uint8_t shift = 0;
+    char* ptr = buf;
     char* end = buf + len;
-    for(char* ptr = buf; ptr < end; ++ptr){
+    for( ; ptr < end; ++ptr){
         if (shift >= 64) {
             return false;
         }
@@ -31,7 +33,7 @@ bool varlong_decode(char* buf, uint8_t len, int64_t* out) {
         shift += 7;
     }
     *out = value;
-    return true;
+    return (ptr-buf);
 }
 
 bool hex_decode(const uint8_t *data, uint8_t length, char* hex_str) {

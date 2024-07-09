@@ -2,6 +2,10 @@
     "files.associations": {
         "server.h": "c",
         "event.h": "c",
-        "datatypes.h": "c"
+        "datatypes.h": "c",
+        "setting.h": "c",
+        "main.h": "c",
+        "common.h": "c",
+        "random": "c"
     }
 }
