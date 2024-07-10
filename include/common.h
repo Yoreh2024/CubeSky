@@ -32,11 +32,19 @@ struct ServerModules{
 };
 
 
+typedef enum {
+    CLIENT_STATUS_HANDSHAKING,
+    CLIENT_STATUS_STATUS,
+    CLIENT_STATUS_LOGIN,
+    CLIENT_STATUS_PLAYING
+} ClientStatus;
+
 struct connect{
     int message_length;
+    ClientStatus status;
 };
+
 struct player{
-    uint8_t status;             // 玩家状态
 };
 struct ClientData{
     struct connect connect;

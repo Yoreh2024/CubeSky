@@ -2,13 +2,11 @@
 
 int main(){
     server_init();
-    server_listen();
-    task_assignment();
-    server_close();
+    //server_listen();
+    //server_close();
 }
 
 int server_init(){
-    
     server_setting();
 }
 

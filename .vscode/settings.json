@@ -6,6 +6,10 @@
         "setting.h": "c",
         "main.h": "c",
         "common.h": "c",
-        "random": "c"
+        "random": "c",
+        "zlog.h": "c",
+        "mimalloc.h": "c",
+        "stdlib.h": "c",
+        "stdint.h": "c"
     }
 }
