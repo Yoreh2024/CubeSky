@@ -1,11 +1,30 @@
 #include "common.h"
 #include "setting.h"
+#include "test.pb-c.h"
 
 struct ServerSettings ServerSetting={0};
 struct ServerData ServerData={0};
 struct ServerModules ServerModules={0};
 
 void protocols_parse_config(const char* path){
+    NetworkMessage message = NETWORK_MESSAGE__INIT;
+    message.packet_id = 0x00;
+    message.protocol_version = 0xFF05;
+    message.server_ip = "127.0.0.1";
+    message.server_port = 0x63DD;
+    message.next_state_id = 0x02;
+
+    size_t encoded_len = network_message__get_packed_size(&message);
+    uint8_t *encoded_data = malloc(encoded_len);
+    network_message__pack(&message, encoded_data);
+
+    // 打印编码后的消息
+    for (size_t i = 0; i < encoded_len; ++i) {
+        printf("%02X ", encoded_data[i]);
+    }
+    free(encoded_data);
+
+    
     /*yyjson_mut_doc *doc = yyjson_mut_doc_new(NULL);
     yyjson_mut_val *root = yyjson_mut_obj(doc);
 
