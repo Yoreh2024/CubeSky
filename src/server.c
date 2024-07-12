@@ -4,19 +4,25 @@ void event_read(struct bufferevent* bev, void* client_data) {
     struct evbuffer *input = bufferevent_get_input(bev);
 
     uint32_t datalen = 0;
-    if(data->connect.message_length == 0){
+    if(data->connect.original_message.length == 0){
         char tmpbuf_datalen[5];
+
         ssize_t tmp = evbuffer_copyout(input, tmpbuf_datalen, 5);
-        uint8_t tmp1 = varint_decode(tmpbuf_datalen, tmp, &datalen);
+        Iterator tmpbuf_tmp={
+            .data=tmpbuf_datalen,
+            .pos=tmpbuf_datalen,
+            .length=5
+        };
+        varint_decode(&tmpbuf_tmp, &datalen);
         printf("数据长度：%d\n", datalen);
-        evbuffer_drain(input, tmp1);
+        evbuffer_drain(input, tmpbuf_tmp.pos-tmpbuf_tmp.data);
         
         if(evbuffer_get_length(input) < datalen){
 
             if(datalen == 0 || datalen > MAX_DATALEN){
                 printf("数据长度不合法\n");
                 bufferevent_flush(bev, EV_READ, BEV_FLUSH);
-                data->connect.message_length = 0;
+                data->connect.original_message.length = 0;
                 bufferevent_setwatermark(bev, EV_READ, 0, 0);
                 return;
             }
@@ -26,15 +32,19 @@ void event_read(struct bufferevent* bev, void* client_data) {
         }
     }
     
-
     char* buf = (char*)mi_malloc(datalen);
     bufferevent_read(bev, buf, datalen);
+
     char tmp[2048];
     hex_decode(buf, datalen, tmp);
-    mi_free(buf);
     printf("收到客户端发来的数据：%s\n", tmp);
-    
-    
+
+    data->connect.original_message.data = buf;
+    data->connect.original_message.pos = buf;
+    data->connect.original_message.length = datalen;
+    clientdata_handler(data);
+
+    mi_free(buf);
     bufferevent_setwatermark(bev, EV_READ, 0, 0);
 }
 

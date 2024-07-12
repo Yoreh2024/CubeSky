@@ -31,26 +31,6 @@ struct ServerModules{
     bool anti_cheat;                // 反作弊
 };
 
-
-typedef enum {
-    CLIENT_STATUS_HANDSHAKING,
-    CLIENT_STATUS_STATUS,
-    CLIENT_STATUS_LOGIN,
-    CLIENT_STATUS_PLAYING
-} ClientStatus;
-
-struct connect{
-    int message_length;
-    ClientStatus status;
-};
-
-struct player{
-};
-struct ClientData{
-    struct connect connect;
-    struct player player;
-};
-
 extern struct ServerSettings ServerSetting;
 extern struct ServerData ServerData;
 extern struct ServerModules ServerModules;
