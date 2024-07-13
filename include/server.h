@@ -11,6 +11,7 @@
 #include "common.h"
 #include "typedefine.h"
 #include "handlers.h"
+#include "codec.h"
 
 // 当从客户端读取到数据时调用的回调函数
 void event_read(struct bufferevent *bev, void* client_data);

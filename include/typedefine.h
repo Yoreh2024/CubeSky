@@ -18,9 +18,12 @@ typedef enum {
 
 struct connect{
     Iterator original_message;
+    struct evbuffer *send_buffer;
     ClientStatus status;
     int32_t protocol_ver;
     unsigned short server_port;
+    char player_name[16];
+    uint64_t player_uuid[2];
 };
 
 struct player{

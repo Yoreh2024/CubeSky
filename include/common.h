@@ -21,6 +21,7 @@ struct ServerSettings{
     bool ipv6_switch;               // 是否启用IPv6
     struct in_addr ipv4_addr;       // 服务器IPv4地址
     struct in6_addr ipv6_addr;      // 服务器IPv6地址
+    bool encryption_switch;         // 是否启用加密
 };
 
 struct ServerData{

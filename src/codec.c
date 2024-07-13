@@ -21,6 +21,18 @@ bool varint_decode(Iterator* it, int32_t* out) {
     return true;
 }
 
+bool varint_encode(int32_t value, Iterator* it) {
+    char* start = it->data;
+    while (value >= 0x80) {
+        *start++ = (value & 0x7F) | 0x80;
+        value >>= 7;
+    }
+    *start++ = value;
+    it->pos = start;
+    it->length = start - it->data;
+    return true;
+}
+
 bool varlong_decode(Iterator* it, int64_t* out) {
     char* start = it->pos;
     const unsigned char* end = it->data + it->length;
@@ -56,5 +68,20 @@ bool unsignedshort_decode(Iterator* it, uint16_t* out){
     }
     *out = htons(*((uint16_t*)it->pos));
     it->pos += 2;
+    return true;
+}
+
+bool string_decode(Iterator* it, Iterator* out, int32_t maxlen) {
+    int32_t len;
+    varint_decode(it, &len);
+    if (len > (it->data + it->length - it->pos) || len < 0 || ( maxlen != 0 && len > maxlen)){
+        return false;
+    }
+    
+    out->data = it->pos;
+    out->pos = it->pos;
+    out->length = len;
+    it->pos += len;
+
     return true;
 }

@@ -17,6 +17,7 @@
         "span": "c",
         "handlers.h": "c",
         "typedefine.h": "c",
-        "codec.h": "c"
+        "codec.h": "c",
+        "stdbool.h": "c"
     }
 }
