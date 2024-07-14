@@ -36,4 +36,9 @@ extern struct ServerSettings ServerSetting;
 extern struct ServerData ServerData;
 extern struct ServerModules ServerModules;
 
+typedef struct{
+    char* data;
+    uint32_t len;
+}String;
+
 #endif

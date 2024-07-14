@@ -48,9 +48,7 @@ void event_read(struct bufferevent* bev, void* client_data) {
     //如果有数据需要发送
     if(data->connect.send_buffer != NULL){
         int32_t send_datalen = evbuffer_get_length(data->connect.send_buffer);
-        Iterator send_datalen_buf;
-        varint_encode(send_datalen, &send_datalen_buf);
-        evbuffer_prepend(data->connect.send_buffer, send_datalen_buf.data, send_datalen_buf.length);
+        varint_encode_prepend(data->connect.send_buffer, send_datalen);
         bufferevent_write_buffer(bev, data->connect.send_buffer);
         evbuffer_free(data->connect.send_buffer);
         data->connect.send_buffer=NULL;

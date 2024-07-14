@@ -21,15 +21,26 @@ bool varint_decode(Iterator* it, int32_t* out) {
     return true;
 }
 
-bool varint_encode(int32_t value, Iterator* it) {
-    char* start = it->data;
+bool varint_encode(struct evbuffer* buf, int32_t value) {
+    char tmp[5];
+    char* start = tmp;
     while (value >= 0x80) {
         *start++ = (value & 0x7F) | 0x80;
         value >>= 7;
     }
     *start++ = value;
-    it->pos = start;
-    it->length = start - it->data;
+    evbuffer_add(buf, &tmp, start-tmp);
+    return true;
+}
+bool varint_encode_prepend(struct evbuffer* buf, int32_t value){
+    char tmp[5];
+    char* start = tmp;
+    while (value >= 0x80) {
+        *start++ = (value & 0x7F) | 0x80;
+        value >>= 7;
+    }
+    *start++ = value;
+    evbuffer_prepend(buf, &tmp, start-tmp);
     return true;
 }
 
@@ -83,5 +94,12 @@ bool string_decode(Iterator* it, Iterator* out, int32_t maxlen) {
     out->length = len;
     it->pos += len;
 
+    return true;
+}
+
+bool string_encode(struct evbuffer* buf, const char* ptr) {
+    size_t len = strlen(ptr);
+    varint_encode(buf, len);
+    evbuffer_add(buf, ptr, len);
     return true;
 }
