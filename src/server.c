@@ -88,7 +88,7 @@ void cb_listener(struct evconnlistener *listener, evutil_socket_t fd, struct soc
 
     bufferevent_setcb(bev, event_read, event_write, event_other, client_data);
 
-    bufferevent_enable(bev, EV_READ);
+    bufferevent_enable(bev, EV_READ | EV_PERSIST);
 
     return ;
 }

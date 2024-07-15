@@ -1,0 +1,129 @@
+# Minecraft 服务器属性
+# 日期: 2024年7月14日 星期日 14:13:22 CST
+[vanilla]
+# 是否接受来自其他服务器的转移请求
+accepts-transfers=false
+# 是否允许飞行模式
+allow-flight=false
+# 是否允许进入下界
+allow-nether=true
+# 是否广播控制台消息给操作员
+broadcast-console-to-ops=true
+# 是否广播RCON消息给操作员
+broadcast-rcon-to-ops=true
+# Bug报告链接
+bug-report-link=""
+# 开启调试模式
+debug=false
+# 游戏难度设置（peaceful, easy, normal, hard）
+difficulty="easy"
+# 是否启用命令方块
+enable-command-block=false
+# 是否启用JMX监控
+enable-jmx-monitoring=false
+# 是否启用查询服务（用于获取服务器状态）
+enable-query=false
+# 是否启用RCON远程控制
+enable-rcon=false
+# 是否启用状态服务（用于获取服务器基本信息）
+enable-status=true
+# 是否强制执行安全配置文件
+enforce-secure-profile=true
+# 是否强制白名单模式
+enforce-whitelist=false
+# 实体广播范围百分比（影响玩家可见距离）
+entity-broadcast-range-percentage=100
+# 是否强制游戏模式
+force-gamemode=false
+# 函数执行权限等级
+function-permission-level=2
+# 默认游戏模式（survival, creative, adventure, spectator）
+gamemode="survival"
+# 是否生成结构（如村庄、要塞等）
+generate-structures=true
+# 世界生成设置（JSON格式）
+generator-settings={}
+# 是否开启硬核模式（玩家死亡后删除存档）
+hardcore=false
+# 是否隐藏在线玩家列表
+hide-online-players=false
+# 初始禁用的数据包
+initial-disabled-packs=[]
+# 初始启用的数据包（默认为 vanilla）
+initial-enabled-packs=["vanilla"]
+# 世界名称
+level-name="world"
+# 世界种子（随机生成世界时使用）
+level-seed=""
+# 世界类型（正常、超平坦、放大、自定义）
+level-type="minecraft:default"
+# 是否记录IP地址
+log-ips=true
+# 最大连锁邻居更新数量（防止卡顿）
+max-chained-neighbor-updates=1000000
+# 最大玩家数量
+max-players=20
+# 最大单个tick时间（毫秒）
+max-tick-time=60000
+# 最大世界大小（区块数）
+max-world-size=29999984
+# 服务器公告（显示在服务器列表中）
+motd="A Minecraft Server"
+# 网络压缩阈值（低于此值的数据包不压缩）
+network-compression-threshold=-1
+# 是否开启在线模式（验证玩家账户）
+online-mode=false
+# 操作员权限等级
+op-permission-level=4
+# 玩家空闲超时时间（秒，0表示无限制）
+player-idle-timeout=0
+# 是否阻止代理连接
+prevent-proxy-connections=false
+# 是否开启PVP（玩家对战）
+pvp=true
+# 查询端口
+query.port=25565
+# 数据传输速率限制（每秒字节数，0表示无限制）
+rate-limit=0
+# RCON密码
+rcon.password=""
+# RCON端口
+rcon.port=25575
+# 区域文件压缩类型（gzip, deflate）
+region-file-compression="deflate"
+# 是否要求玩家下载资源包
+require-resource-pack=false
+# 资源包URL
+resource-pack=""
+# 资源包ID
+resource-pack-id=0
+# 资源包提示信息
+resource-pack-prompt=""
+# 资源包SHA1校验码
+resource-pack-sha1=""
+# 服务器IP地址（留空则监听所有接口）
+server-ip=""
+# 服务器名称
+server-name="Unknown Server"
+# 服务器端口
+server-port=25565
+# 模拟距离（影响渲染范围）
+simulation-distance=10
+# 是否生成动物
+spawn-animals=true
+# 是否生成怪物
+spawn-monsters=true
+# 是否生成NPC
+spawn-npcs=true
+# 生成保护区域半径（阻止破坏）
+spawn-protection=16
+# 是否同步区块写入（防止数据丢失）
+sync-chunk-writes=true
+# 文本过滤配置文件
+text-filtering-config=""
+# 是否使用原生传输协议（提高网络效率）
+use-native-transport=true
+# 视野距离（影响加载区块数量）
+view-distance=10
+# 是否开启白名单（只有白名单内的玩家可加入）
+white-list=false

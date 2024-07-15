@@ -13,6 +13,7 @@ target_link_libraries(CubeSky PRIVATE event)
 target_link_libraries(CubeSky PRIVATE yyjson)
 target_link_libraries(CubeSky PRIVATE mimalloc)
 target_link_libraries(CubeSky PRIVATE protobuf-c)
+target_link_libraries(CubeSky PRIVATE toml)
 
 # 自动包含 src 目录下的所有 .c 文件
 file(GLOB_RECURSE SRC_FILES "src/*.c")
@@ -23,3 +24,5 @@ target_sources(${PROJECT_NAME} PRIVATE ${INCLUDE_FILES} ${SRC_FILES})
 
 # 设置头文件的包含目录
 target_include_directories(${PROJECT_NAME} PRIVATE include)
+
+execute_process( COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/data ${CMAKE_CURRENT_BINARY_DIR})

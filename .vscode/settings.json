@@ -18,6 +18,18 @@
         "handlers.h": "c",
         "typedefine.h": "c",
         "codec.h": "c",
-        "stdbool.h": "c"
+        "stdbool.h": "c",
+        "bit": "c",
+        "charconv": "c",
+        "chrono": "c",
+        "compare": "c",
+        "cstddef": "c",
+        "optional": "c",
+        "format": "c",
+        "limits": "c",
+        "memory": "c",
+        "new": "c",
+        "text_encoding": "c",
+        "functional": "c"
     }
 }

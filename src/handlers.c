@@ -17,8 +17,14 @@ void clientdata_handler(struct ClientData* data){
 
     case CLIENT_STATUS_STATUS:
 
-        printf("ping逻辑\n");
-        break;
+        switch(*(it->pos-1)){
+        case 0x00:
+            handler_StatusRequest(data);
+            break;
+        case 0x01:
+            handler_PingRequest(data);
+            break;
+        }
 
     case CLIENT_STATUS_LOGIN:
 
@@ -36,10 +42,12 @@ void clientdata_handler(struct ClientData* data){
         case 0x04:
             break;
         }
+
     case CLIENT_STATUS_CONFIGURATION:
 
         switch(*(it->pos-1)){
         case 0x00:
+            handler_ClientInformation(data);
             break;
         case 0x01:
             break;
@@ -88,10 +96,170 @@ void clientdata_handler(struct ClientData* data){
     }
     
 }
+
+//握手状态 CLIENT_STATUS_HANDSHAKING
+
+void handler_Handshake(struct ClientData* data){
+    Iterator* it = &data->connect.original_message;
+    //获取客户端通信协议版本
+    varint_decode(it, &data->connect.protocol_ver);
+
+    //跳过接收服务器ip
+    int32_t tmp;
+    varint_decode(it, &tmp);
+    it->pos += tmp;
+
+    //服务器端口号
+    unsignedshort_decode(it, &data->connect.server_port);
+    
+    switch (*it->pos){
+    case 0x01:
+        data->connect.status++;
+        reply_StatusResponse(data);
+        break;
+    case 0x02:
+        data->connect.status+=2;
+        break;
+    case 0x03:
+        break;
+    default:
+        break;
+    }
+    
+}
+
+//查询状态 CLIENT_STATUS_STATUS
+
+void handler_StatusRequest(struct ClientData* data){
+    reply_StatusResponse(data);
+}
+
+void reply_StatusResponse(struct ClientData* data){
+    struct evbuffer* buf = data->connect.send_buffer = evbuffer_new();
+    //包ID 0x00
+    evbuffer_add(buf, "\x00", 1);
+    //状态响应内容
+    char tmp[]="{\"version\": {\"name\": \"1.19.4\",\"protocol\": 762},\"players\": {\"max\": 100,\"online\": 5,\"sample\": [{\"name\": \"thinkofdeath\",\"id\": \"4566e69f-c907-48ee-8d71-d7ba5aa00d20\"}]}}";
+    string_encode(buf, tmp);
+}
+
+void handler_PingRequest(struct ClientData* data){
+    struct evbuffer* buf = data->connect.send_buffer = evbuffer_new();
+    evbuffer_add(buf, data->connect.original_message.data, data->connect.original_message.length);
+}
+
+
+//登录状态 CLIENT_STATUS_LOGIN
+
+void handler_EncryptionResponse(struct ClientData* data){
+    Iterator* it = &data->connect.original_message;
+    //获取用户名称
+    Iterator name;
+    string_decode(it, &name, 16);
+    strncpy(data->connect.player_name, name.data, name.length);
+    data->connect.player_name[name.length]='\0';
+
+    //获取UUID
+    memcpy(data->connect.player_uuid, it->pos, 16);
+
+    //回复客户端消息
+    if(ServerSetting.encryption_switch){
+        reply_EncryptionRequest(data);
+    }
+    reply_LoginSuccess(data);
+}
+
+void reply_EncryptionRequest(struct ClientData* data){
+
+
+}
+
+void reply_LoginSuccess(struct ClientData* data){
+    struct evbuffer* buf = data->connect.send_buffer = evbuffer_new();
+    //包ID 0x02
+    evbuffer_add(buf, "\x02", 1);
+    //玩家UUID
+    evbuffer_add(buf, data->connect.player_uuid, 16);
+    //玩家名称
+    string_encode(buf, data->connect.player_name);
+    //物品数量
+    int32_t item_count = 0;
+    varint_encode(buf, item_count);
+    //如果客户端认为数据包不正常是否立即断开
+    bool is_disconnect = true;
+    evbuffer_add(buf, &is_disconnect, 1);
+}
+
+void handler_LoginAcknowledged(struct ClientData* data){
+    data->connect.status++;
+    reply_RegistryData(data);
+}
+void reply_RegistryData(struct ClientData* data){
+    struct evbuffer* buf = data->connect.send_buffer = evbuffer_new();
+    //包ID 0x07
+    evbuffer_add(buf, "\x07", 1);
+    //
+}
+
+void reply_ClientboundKnownPacks(struct ClientData* data){
+    struct evbuffer* buf = data->connect.send_buffer = evbuffer_new();
+    //包ID 0x0E
+    evbuffer_add(buf, "\x0E", 1);
+    //服务器上存在的数据包的数量
+    varint_encode(buf, 1);
+    //数据包名
+    string_encode(buf, "minecraft");
+    //数据包ID
+    string_encode(buf, "core");
+    //数据包版本
+    string_encode(buf, "1.21");
+}
+
+
+//配置状态 CLIENT_STATUS_CONFIGURATION
+
+void handler_ClientInformation(struct ClientData* data){
+    ClientInfo* info = &data->connect.client_info;
+    Iterator* it = &data->connect.original_message;
+    //客户端语言
+    Iterator tmp;
+    string_decode(it, &tmp, 16);
+    strncpy(info->locale, tmp.data, tmp.length);
+    info->locale[tmp.length] = '\0';
+    //客户端渲染距离，以块为单位
+    byte_decode(it, &info->view_distance);
+    //聊天模式
+    int32_t chatmode;
+    varint_decode(it, &chatmode);
+    info->chat_mode = (int8_t)chatmode;
+    //聊天颜色
+    buf_decode(it, &info->chat_colors, sizeof(bool));
+    //显示的皮肤部件
+    buf_decode(it, &info->skin_parts, 1);
+    //主手
+    buf_decode(it, &info->main_hand, 1);
+    //允许过滤标志和书名上的文本。
+    buf_decode(it, &info->text_filtering, sizeof(bool));
+    //允许被显示在服务器列表中
+    buf_decode(it, &info->allow_serverlistings, sizeof(bool));
+}
+
 void handler_AcknowledgeFinishConfiguration(struct ClientData* data){
     data->connect.status++;
     reply_LoginPlay(data);
 }
+
+void handler_RegistryData(struct ClientData* data){
+    reply_FinishConfiguration(data);
+}
+
+void reply_FinishConfiguration(struct ClientData* data){
+    data->connect.send_buffer = evbuffer_new();
+    //包ID 0x03
+    evbuffer_add(data->connect.send_buffer, "\x03", 1);
+}
+
+//游玩状态 CLIENT_STATUS_PLAYING
 
 void reply_LoginPlay(struct ClientData* data){
     struct evbuffer* buf = data->connect.send_buffer = evbuffer_new();
@@ -136,99 +304,4 @@ void reply_LoginPlay(struct ClientData* data){
     varint_encode(buf, 0);
     //强制执行安全聊天
     evbuffer_add(buf, &is_false, 1);
-}
-
-void handler_LoginAcknowledged(struct ClientData* data){
-    data->connect.status++;
-    reply_RegistryData(data);
-}
-
-void handler_RegistryData(struct ClientData* data){
-    reply_FinishConfiguration(data);
-}
-
-void reply_FinishConfiguration(struct ClientData* data){
-    data->connect.send_buffer = evbuffer_new();
-    //包ID 0x03
-    evbuffer_add(data->connect.send_buffer, "\x03", 1);
-}
-
-void reply_RegistryData(struct ClientData* data){
-    struct evbuffer* buf = data->connect.send_buffer = evbuffer_new();
-    //包ID 0x0E
-    evbuffer_add(buf, "\x0E", 1);
-    //服务器上存在的数据包的数量
-    varint_encode(buf, 1);
-    //数据包名
-    string_encode(buf, "minecraft");
-    //数据包ID
-    string_encode(buf, "core");
-    //数据包版本
-    string_encode(buf, "1.21");
-}
-
-void handler_EncryptionResponse(struct ClientData* data){
-    Iterator* it = &data->connect.original_message;
-    //获取用户名称
-    Iterator name;
-    string_decode(it, &name, 16);
-    strncpy(data->connect.player_name, name.data, name.length);
-    data->connect.player_name[name.length]='\0';
-
-    //获取UUID
-    memcpy(data->connect.player_uuid, it->pos, 16);
-
-    //回复客户端消息
-    if(ServerSetting.encryption_switch){
-        reply_EncryptionRequest(data);
-    }
-    reply_LoginSuccess(data);
-}
-void reply_EncryptionRequest(struct ClientData* data){
-
-
-}
-
-void reply_LoginSuccess(struct ClientData* data){
-    struct evbuffer* buf = data->connect.send_buffer = evbuffer_new();
-    //包ID 0x02
-    evbuffer_add(buf, "\x02", 1);
-    //玩家UUID
-    evbuffer_add(buf, data->connect.player_uuid, 16);
-    //玩家名称
-    string_encode(buf, data->connect.player_name);
-    //物品数量
-    int32_t item_count = 0;
-    varint_encode(buf, item_count);
-    //如果客户端认为数据包不正常是否立即断开
-    bool is_disconnect = true;
-    evbuffer_add(buf, &is_disconnect, 1);
-}
-
-void handler_Handshake(struct ClientData* data){
-    Iterator* it = &data->connect.original_message;
-    //获取客户端通信协议版本
-    varint_decode(it, &data->connect.protocol_ver);
-
-    //跳过接收服务器ip
-    int32_t tmp;
-    varint_decode(it, &tmp);
-    it->pos += tmp;
-
-    //服务器端口号
-    unsignedshort_decode(it, &data->connect.server_port);
-    
-    switch (*it->pos){
-    case 0x01:
-        data->connect.status++;
-        break;
-    case 0x02:
-        data->connect.status+=2;
-        break;
-    case 0x03:
-        break;
-    default:
-        break;
-    }
-    
 }

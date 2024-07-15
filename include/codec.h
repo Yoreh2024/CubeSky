@@ -14,3 +14,5 @@ bool unsignedshort_decode(Iterator* it, uint16_t* out);
 bool string_decode(Iterator* it, Iterator* out, int32_t maxlen);
 bool string_encode(struct evbuffer* buf, const char* ptr);
 bool hex_decode(const uint8_t *data, uint8_t length, char* hex_str);
+bool byte_decode(Iterator* it, int8_t* out);
+bool buf_decode(Iterator* it, void* out, uint16_t len);

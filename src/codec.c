@@ -85,7 +85,7 @@ bool unsignedshort_decode(Iterator* it, uint16_t* out){
 bool string_decode(Iterator* it, Iterator* out, int32_t maxlen) {
     int32_t len;
     varint_decode(it, &len);
-    if (len > (it->data + it->length - it->pos) || len < 0 || ( maxlen != 0 && len > maxlen)){
+    if ((len > (it->data + it->length - it->pos)) || len < -1 || ( maxlen != -1 && len > maxlen)){
         return false;
     }
     
@@ -101,5 +101,23 @@ bool string_encode(struct evbuffer* buf, const char* ptr) {
     size_t len = strlen(ptr);
     varint_encode(buf, len);
     evbuffer_add(buf, ptr, len);
+    return true;
+}
+
+bool byte_decode(Iterator* it, int8_t* out) {
+    if(it->pos - it->data < 1){
+        return false;
+    }
+    *out = *it->pos;
+    it->pos ++;
+    return true;
+}
+
+bool buf_decode(Iterator* it, void* out, uint16_t len){
+    if(len > (it->data + it->length - it->pos)){
+        return false;
+    }
+    memcpy(out, it->pos, len);
+    it->pos+=len;
     return true;
 }
