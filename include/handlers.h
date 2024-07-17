@@ -22,3 +22,6 @@ void handler_ClientInformation(struct ClientData* data);
 void handler_ServerboundPluginMessage(struct ClientData* data);
 void reply_ClientboundPluginMessage(struct ClientData* data);
 void reply_FinishConfiguration(struct ClientData* data);
+void handler_ConfirmTeleportation(struct ClientData* data);
+void reply_GameEvent(struct ClientData* data);
+void reply_SynchronizePlayerPosition(struct ClientData* data);

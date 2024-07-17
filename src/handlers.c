@@ -90,7 +90,11 @@ void clientdata_handler(struct ClientData* data){
 
     case CLIENT_STATUS_PLAYING:
 
-        printf("收到游戏数据\n");
+        switch (*(it->pos-1)){
+        case 0x00:
+            handler_ConfirmTeleportation(data);
+            break;
+        }
         break;
     }
 }
@@ -270,9 +274,25 @@ void reply_ClientboundPluginMessage(struct ClientData* data){
 void handler_AcknowledgeFinishConfiguration(struct ClientData* data){
     data->connect.status++;
     reply_LoginPlay(data);
+    reply_SynchronizePlayerPosition(data);
 }
 
 //游玩状态 CLIENT_STATUS_PLAYING
+
+void handler_ConfirmTeleportation(struct ClientData* data){
+    Iterator* it = &data->connect.original_message;
+    //varint_decode(it, &data->connect.teleport_id);
+    reply_GameEvent(data);
+}
+
+void reply_GameEvent(struct ClientData* data){
+    struct evbuffer* buf = data->connect.send_buffer = evbuffer_new();
+    //包ID 0x22
+    evbuffer_add(buf, "\x22", 1);
+    //事件ID
+    uint8_t a=13;
+    evbuffer_add(buf, &a, 1);
+}
 
 void reply_LoginPlay(struct ClientData* data){
     struct evbuffer* buf = data->connect.send_buffer = evbuffer_new();
@@ -283,11 +303,16 @@ void reply_LoginPlay(struct ClientData* data){
     //玩家的实体ID（EID）
     int32_t eid = 0;
     evbuffer_add(buf, &eid, 4);
-    //Is hardcore 暂不清楚
+    //是否是硬编码的数据
     evbuffer_add(buf, &is_false, 1);
-    //注册表数量
+    //暂时不清楚是什么
+    evbuffer_add(buf, "\x63\x00", 2);
+    //维度数量
     varint_encode(buf, 0);
-    //注册表名称
+    //维度数组
+    string_encode(buf, "minecraft:overworld"); //主世界
+    //string_encode(buf, "minecraft:the_nether"); //下界
+    //string_encode(buf, "minecraft:overworld"); //末地
     //最大玩家数
     varint_encode(buf, 20);
     //视距 2-32
@@ -300,21 +325,45 @@ void reply_LoginPlay(struct ClientData* data){
     evbuffer_add(buf, &is_false, 1);
     //玩家是否只能制作他们已经解锁的食谱
     evbuffer_add(buf, &is_false, 1);
-    //尺寸类型
+    //当前所处的维度类型
     varint_encode(buf, 0);
-    //注册表名称
+    //维度名称
+    string_encode(buf, "minecraft:overworld");
     //散列种子
+    evbuffer_add(buf, "\x33\xD2\xA3\x4F\x5E\x5F\x13\x44", 8);
     //游戏模式
     uint8_t game_mode = 0;
     evbuffer_add(buf, &game_mode, 1);
+    //上一个游戏模式
+    evbuffer_add(buf, "\xFF", 1);
     //调试模式
     evbuffer_add(buf, &is_true, 1);
     //平坦世界
     evbuffer_add(buf, &is_false, 1);
     //有死亡地点
     evbuffer_add(buf, &is_false, 1);
+    if(0==1){
+        //死亡维度名称
+        string_encode(buf, "minecraft:overworld");
+        //死亡地址坐标
+        evbuffer_add(buf, "\xFF\xFF\xF2\x3F\xFF\xFD\x70\x45", 8);
+    }
     //传送门冷却时间
     varint_encode(buf, 0);
     //强制执行安全聊天
-    evbuffer_add(buf, &is_false, 1);
+    evbuffer_add(buf, &is_false, 0);
+}
+
+void reply_SynchronizePlayerPosition(struct ClientData* data){
+    struct evbuffer* buf = data->connect.send_buffer = evbuffer_new();
+    //包ID
+    evbuffer_add(buf, "\x40", 1);
+    //X
+    
+    //Y
+    //Z
+    //X轴上的绝对或相对旋转，以度为单位。
+    //Y轴上的绝对或相对旋转，以度为单位。
+    //标志
+    //传送ID
 }
