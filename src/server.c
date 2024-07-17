@@ -1,62 +1,73 @@
 #include "server.h"
 void event_read(struct bufferevent* bev, void* client_data) {
-    struct ClientData* data = client_data;
     struct evbuffer *input = bufferevent_get_input(bev);
 
-    uint32_t datalen = 0;
-    if(data->connect.original_message.length == 0){
-        char tmpbuf_datalen[5];
+    while(evbuffer_get_length(input) != 0){
+        struct ClientData* data = client_data;
 
-        ssize_t tmp = evbuffer_copyout(input, tmpbuf_datalen, 5);
+        uint32_t datalen = 0;
+        //上轮是否处理了完整消息（是否有消息残余）
+        if(data->connect.original_message.length == 0){
+            char tmpbuf_datalen[5];
 
-        Iterator tmpbuf_tmp={
-            .data=tmpbuf_datalen,
-            .pos=tmpbuf_datalen,
-            .length=tmp
-        };
-        varint_decode(&tmpbuf_tmp, &datalen);
-        printf("数据长度：%d\n", datalen);
+            ssize_t tmp = evbuffer_copyout(input, tmpbuf_datalen, 5);
 
-        evbuffer_drain(input, tmpbuf_tmp.pos-tmpbuf_tmp.data);
-        
-        if(evbuffer_get_length(input) < datalen){
-            if(datalen == 0 || datalen > MAX_DATALEN){
-                printf("数据长度不合法\n");
-                bufferevent_flush(bev, EV_READ, BEV_FLUSH);
-                data->connect.original_message.length = 0;
-                bufferevent_setwatermark(bev, EV_READ, 0, 0);
+            Iterator tmpbuf_tmp={
+                .data=tmpbuf_datalen,
+                .pos=tmpbuf_datalen,
+                .length=tmp
+            };
+            varint_decode(&tmpbuf_tmp, &datalen);
+            printf("数据长度:%d\n", datalen);
+
+            evbuffer_drain(input, tmpbuf_tmp.pos-tmpbuf_tmp.data);
+            
+
+            if(evbuffer_get_length(input) < datalen){
+                if(datalen == 0 || datalen > MAX_DATALEN){
+                    printf("数据长度不合法\n");
+                    bufferevent_flush(bev, EV_READ, BEV_FLUSH);
+                    data->connect.original_message.length = 0;
+                    bufferevent_setwatermark(bev, EV_READ, 0, 0);
+                    return;
+                }
+
+                printf("缓冲区数据长度:%d\n", evbuffer_get_length(input));
+                data->connect.original_message.length = datalen;
+                bufferevent_setwatermark(bev, EV_READ, datalen, 0);
                 return;
             }
-
-            bufferevent_setwatermark(bev, EV_READ, datalen, 0);
-            return;
+        }else{
+            //上一轮解析出的数据长度
+            datalen = data->connect.original_message.length;
         }
+        
+        char* buf = (char*)mi_malloc(datalen);
+        bufferevent_read(bev, buf, datalen);
+
+        char tmp[2048];
+        hex_decode(buf, datalen, tmp);
+        printf("收到客户端发来的数据：%s\n", tmp);
+
+        data->connect.original_message.data = buf;
+        data->connect.original_message.pos = buf;
+        data->connect.original_message.length = datalen;
+        //接收消息并处理
+        clientdata_handler(data);
+        //如果有数据需要发送
+        if(data->connect.send_buffer != NULL){
+            int32_t send_datalen = evbuffer_get_length(data->connect.send_buffer);
+            varint_encode_prepend(data->connect.send_buffer, send_datalen);
+            bufferevent_write_buffer(bev, data->connect.send_buffer);
+            evbuffer_free(data->connect.send_buffer);
+            data->connect.send_buffer=NULL;
+        }
+        
+        mi_free(buf);
+        bufferevent_setwatermark(bev, EV_READ, 0, 0);
+        data->connect.original_message.length = 0;
     }
     
-    char* buf = (char*)mi_malloc(datalen);
-    bufferevent_read(bev, buf, datalen);
-
-    char tmp[2048];
-    hex_decode(buf, datalen, tmp);
-    printf("收到客户端发来的数据：%s\n", tmp);
-
-    data->connect.original_message.data = buf;
-    data->connect.original_message.pos = buf;
-    data->connect.original_message.length = datalen;
-    //接收消息并处理
-    clientdata_handler(data);
-    //如果有数据需要发送
-    if(data->connect.send_buffer != NULL){
-        int32_t send_datalen = evbuffer_get_length(data->connect.send_buffer);
-        varint_encode_prepend(data->connect.send_buffer, send_datalen);
-        bufferevent_write_buffer(bev, data->connect.send_buffer);
-        evbuffer_free(data->connect.send_buffer);
-        data->connect.send_buffer=NULL;
-    }
-    
-    mi_free(buf);
-    bufferevent_setwatermark(bev, EV_READ, 0, 0);
-    data->connect.original_message.length = 0;
 }
 
 void event_write(struct bufferevent* bev, void* client_data){
@@ -88,7 +99,7 @@ void cb_listener(struct evconnlistener *listener, evutil_socket_t fd, struct soc
 
     bufferevent_setcb(bev, event_read, event_write, event_other, client_data);
 
-    bufferevent_enable(bev, EV_READ | EV_PERSIST);
+    bufferevent_enable(bev, EV_READ);
 
     return ;
 }

@@ -25,6 +25,7 @@ void clientdata_handler(struct ClientData* data){
             handler_PingRequest(data);
             break;
         }
+        break;
 
     case CLIENT_STATUS_LOGIN:
 
@@ -42,6 +43,7 @@ void clientdata_handler(struct ClientData* data){
         case 0x04:
             break;
         }
+        break;
 
     case CLIENT_STATUS_CONFIGURATION:
 
@@ -52,6 +54,7 @@ void clientdata_handler(struct ClientData* data){
         case 0x01:
             break;
         case 0x02:
+            handler_ServerboundPluginMessage(data);
             break;
         case 0x03:
             handler_AcknowledgeFinishConfiguration(data);
@@ -63,7 +66,6 @@ void clientdata_handler(struct ClientData* data){
         case 0x06:
             break;
         case 0x07:
-            handler_RegistryData(data);
             break;
         case 0x08:
             break;
@@ -83,18 +85,14 @@ void clientdata_handler(struct ClientData* data){
             break;
         case 0x10:
             break;
-    }
+        }
+        break;
 
     case CLIENT_STATUS_PLAYING:
 
         printf("收到游戏数据\n");
         break;
-
-    default:
-        break;
-
     }
-    
 }
 
 //握手状态 CLIENT_STATUS_HANDSHAKING
@@ -115,7 +113,6 @@ void handler_Handshake(struct ClientData* data){
     switch (*it->pos){
     case 0x01:
         data->connect.status++;
-        reply_StatusResponse(data);
         break;
     case 0x02:
         data->connect.status+=2;
@@ -128,7 +125,7 @@ void handler_Handshake(struct ClientData* data){
     
 }
 
-//查询状态 CLIENT_STATUS_STATUS
+//Ping状态 CLIENT_STATUS_STATUS
 
 void handler_StatusRequest(struct ClientData* data){
     reply_StatusResponse(data);
@@ -139,7 +136,7 @@ void reply_StatusResponse(struct ClientData* data){
     //包ID 0x00
     evbuffer_add(buf, "\x00", 1);
     //状态响应内容
-    char tmp[]="{\"version\": {\"name\": \"1.19.4\",\"protocol\": 762},\"players\": {\"max\": 100,\"online\": 5,\"sample\": [{\"name\": \"thinkofdeath\",\"id\": \"4566e69f-c907-48ee-8d71-d7ba5aa00d20\"}]}}";
+    char tmp[]="{\"version\": {\"name\": \"CubeSky 1.21\",\"protocol\": 767},\"description\":\"A Minecraft Server\",\"players\": {\"max\": 100,\"online\": 5}}";
     string_encode(buf, tmp);
 }
 
@@ -192,7 +189,7 @@ void reply_LoginSuccess(struct ClientData* data){
 
 void handler_LoginAcknowledged(struct ClientData* data){
     data->connect.status++;
-    reply_RegistryData(data);
+    //reply_RegistryData(data);
 }
 void reply_RegistryData(struct ClientData* data){
     struct evbuffer* buf = data->connect.send_buffer = evbuffer_new();
@@ -242,14 +239,7 @@ void handler_ClientInformation(struct ClientData* data){
     buf_decode(it, &info->text_filtering, sizeof(bool));
     //允许被显示在服务器列表中
     buf_decode(it, &info->allow_serverlistings, sizeof(bool));
-}
 
-void handler_AcknowledgeFinishConfiguration(struct ClientData* data){
-    data->connect.status++;
-    reply_LoginPlay(data);
-}
-
-void handler_RegistryData(struct ClientData* data){
     reply_FinishConfiguration(data);
 }
 
@@ -257,6 +247,29 @@ void reply_FinishConfiguration(struct ClientData* data){
     data->connect.send_buffer = evbuffer_new();
     //包ID 0x03
     evbuffer_add(data->connect.send_buffer, "\x03", 1);
+}
+
+void handler_ServerboundPluginMessage(struct ClientData* data){
+    Iterator* it = &data->connect.original_message;
+    Iterator channel;
+    string_decode(it, &channel, 32767);
+    Iterator channel_data;
+    string_decode(it, &channel_data, 32767);
+
+    reply_ClientboundPluginMessage(data);
+}
+
+void reply_ClientboundPluginMessage(struct ClientData* data){
+    struct evbuffer* buf = data->connect.send_buffer = evbuffer_new();
+    //包ID 0x0E
+    evbuffer_add(buf, "\x01", 1);
+    string_encode(buf, "minecraft:brand");
+    string_encode(buf, "vanilla");
+}
+
+void handler_AcknowledgeFinishConfiguration(struct ClientData* data){
+    data->connect.status++;
+    reply_LoginPlay(data);
 }
 
 //游玩状态 CLIENT_STATUS_PLAYING
