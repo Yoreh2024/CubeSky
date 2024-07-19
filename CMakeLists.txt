@@ -12,7 +12,6 @@ add_executable(${PROJECT_NAME} src/main.c)
 target_link_libraries(CubeSky PRIVATE event)
 target_link_libraries(CubeSky PRIVATE yyjson)
 target_link_libraries(CubeSky PRIVATE mimalloc)
-target_link_libraries(CubeSky PRIVATE protobuf-c)
 target_link_libraries(CubeSky PRIVATE toml)
 
 # 自动包含 src 目录下的所有 .c 文件
