@@ -359,11 +359,17 @@ void reply_SynchronizePlayerPosition(struct ClientData* data){
     //包ID
     evbuffer_add(buf, "\x40", 1);
     //X
-    
+    double x = 0;
     //Y
+    double y = 0;
     //Z
+    double z = 0;
     //X轴上的绝对或相对旋转，以度为单位。
+    float Yaw = 0;
     //Y轴上的绝对或相对旋转，以度为单位。
+    float Pitch = 0;
     //标志
+    evbuffer_add(buf, "\x00", 1);
     //传送ID
+    varint_encode(buf, 1);
 }
