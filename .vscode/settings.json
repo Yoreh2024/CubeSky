@@ -30,6 +30,8 @@
         "memory": "c",
         "new": "c",
         "text_encoding": "c",
-        "functional": "c"
+        "functional": "c",
+        "system_error": "c",
+        "yyjson.h": "c"
     }
 }

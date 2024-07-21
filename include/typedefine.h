@@ -3,12 +3,6 @@
 #ifndef TYPEDEFINE_H
 #define TYPEDEFINE_H
 
-typedef struct {
-    const char* data;
-    char* pos;
-    uint32_t length;
-} Iterator;
-
 typedef enum {
     CLIENT_STATUS_HANDSHAKING,
     CLIENT_STATUS_STATUS,
@@ -54,5 +48,7 @@ struct ClientData{
     struct connect connect;
     struct player player;
 };
+
+
 
 #endif

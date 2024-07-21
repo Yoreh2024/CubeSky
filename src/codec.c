@@ -1,8 +1,17 @@
 #include "codec.h"
 
-bool varint_decode(Iterator* it, int32_t* out) {
+bool void_decode(Data* it, Data* out, uint16_t len){
+    if(len > (it->p + it->len - it->pos)){
+        return ;
+    }
+    memcpy(out, it->pos, len);
+    it->pos+=len;
+    return true;
+}
+
+Data varint_decode(Data* it, int32_t* out) {
     char* start = it->pos;
-    const unsigned char* end = it->data + it->length;
+    const unsigned char* end = it->p + it->len;
     int32_t value = 0;
     uint8_t shift = 0;
 
@@ -21,7 +30,7 @@ bool varint_decode(Iterator* it, int32_t* out) {
     return true;
 }
 
-bool varint_encode(struct evbuffer* buf, int32_t value) {
+Data varint_encode(struct evbuffer* buf, int32_t value) {
     char tmp[5];
     char* start = tmp;
     while (value >= 0x80) {
@@ -32,7 +41,7 @@ bool varint_encode(struct evbuffer* buf, int32_t value) {
     evbuffer_add(buf, &tmp, start-tmp);
     return true;
 }
-bool varint_encode_prepend(struct evbuffer* buf, int32_t value){
+Data varint_encode_prepend(struct evbuffer* buf, int32_t value){
     char tmp[5];
     char* start = tmp;
     while (value >= 0x80) {
@@ -44,7 +53,7 @@ bool varint_encode_prepend(struct evbuffer* buf, int32_t value){
     return true;
 }
 
-bool varlong_decode(Iterator* it, int64_t* out) {
+Data varlong_decode(Data* it, int64_t* out) {
     char* start = it->pos;
     const unsigned char* end = it->data + it->length;
     int64_t value = 0;
@@ -73,16 +82,7 @@ bool hex_decode(const uint8_t *data, uint8_t length, char* hex_str) {
     return true;
 }
 
-bool unsignedshort_decode(Iterator* it, uint16_t* out){
-    if(it->pos - it->data < 2){
-        return false;
-    }
-    *out = htons(*((uint16_t*)it->pos));
-    it->pos += 2;
-    return true;
-}
-
-bool string_decode(Iterator* it, Iterator* out, int32_t maxlen) {
+Data string_decode(Data* it, Data* out, int32_t maxlen) {
     int32_t len;
     varint_decode(it, &len);
     if ((len > (it->data + it->length - it->pos)) || len < -1 || ( maxlen != -1 && len > maxlen)){
@@ -97,27 +97,9 @@ bool string_decode(Iterator* it, Iterator* out, int32_t maxlen) {
     return true;
 }
 
-bool string_encode(struct evbuffer* buf, const char* ptr) {
+Data string_encode(struct evbuffer* buf, const char* ptr) {
     size_t len = strlen(ptr);
     varint_encode(buf, len);
     evbuffer_add(buf, ptr, len);
-    return true;
-}
-
-bool byte_decode(Iterator* it, int8_t* out) {
-    if(it->pos - it->data < 1){
-        return false;
-    }
-    *out = *it->pos;
-    it->pos ++;
-    return true;
-}
-
-bool buf_decode(Iterator* it, void* out, uint16_t len){
-    if(len > (it->data + it->length - it->pos)){
-        return false;
-    }
-    memcpy(out, it->pos, len);
-    it->pos+=len;
     return true;
 }
