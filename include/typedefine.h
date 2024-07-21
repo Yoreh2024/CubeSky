@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include "common.h"
 
 #ifndef TYPEDEFINE_H
 #define TYPEDEFINE_H
@@ -30,7 +31,7 @@ typedef struct {
 } ClientInfo;
 
 struct connect{
-    Iterator original_message;
+    Data original_message;
     struct evbuffer *send_buffer;
     ClientStatus status;
     int32_t protocol_ver;
@@ -48,7 +49,4 @@ struct ClientData{
     struct connect connect;
     struct player player;
 };
-
-
-
 #endif

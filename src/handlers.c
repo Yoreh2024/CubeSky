@@ -1,6 +1,6 @@
 #include "handlers.h"
 void clientdata_handler(struct ClientData* data){
-    Iterator* it = &data->connect.original_message;
+    Data* it = &data->connect.original_message;
 
     it->pos++;
     switch (data->connect.status){
@@ -102,7 +102,7 @@ void clientdata_handler(struct ClientData* data){
 //握手状态 CLIENT_STATUS_HANDSHAKING
 
 void handler_Handshake(struct ClientData* data){
-    Iterator* it = &data->connect.original_message;
+    Data* it = &data->connect.original_message;
     //获取客户端通信协议版本
     varint_decode(it, &data->connect.protocol_ver);
 
@@ -146,19 +146,19 @@ void reply_StatusResponse(struct ClientData* data){
 
 void handler_PingRequest(struct ClientData* data){
     struct evbuffer* buf = data->connect.send_buffer = evbuffer_new();
-    evbuffer_add(buf, data->connect.original_message.data, data->connect.original_message.length);
+    evbuffer_add(buf, data->connect.original_message.p, data->connect.original_message.len);
 }
 
 
 //登录状态 CLIENT_STATUS_LOGIN
 
 void handler_EncryptionResponse(struct ClientData* data){
-    Iterator* it = &data->connect.original_message;
+    Data* it = &data->connect.original_message;
     //获取用户名称
-    Iterator name;
+    Data name;
     string_decode(it, &name, 16);
-    strncpy(data->connect.player_name, name.data, name.length);
-    data->connect.player_name[name.length]='\0';
+    strncpy(data->connect.player_name, name.p, name.len);
+    data->connect.player_name[name.len]='\0';
 
     //获取UUID
     memcpy(data->connect.player_uuid, it->pos, 16);
@@ -221,12 +221,12 @@ void reply_ClientboundKnownPacks(struct ClientData* data){
 
 void handler_ClientInformation(struct ClientData* data){
     ClientInfo* info = &data->connect.client_info;
-    Iterator* it = &data->connect.original_message;
+    Data* it = &data->connect.original_message;
     //客户端语言
-    Iterator tmp;
+    Data tmp;
     string_decode(it, &tmp, 16);
-    strncpy(info->locale, tmp.data, tmp.length);
-    info->locale[tmp.length] = '\0';
+    strncpy(info->locale, tmp.p, tmp.len);
+    info->locale[tmp.len] = '\0';
     //客户端渲染距离，以块为单位
     byte_decode(it, &info->view_distance);
     //聊天模式
@@ -234,15 +234,15 @@ void handler_ClientInformation(struct ClientData* data){
     varint_decode(it, &chatmode);
     info->chat_mode = (int8_t)chatmode;
     //聊天颜色
-    buf_decode(it, &info->chat_colors, sizeof(bool));
+    boolean_decode(it, &info->chat_colors);
     //显示的皮肤部件
-    buf_decode(it, &info->skin_parts, 1);
+    unsignedbyte_decode(it, &info->skin_parts);
     //主手
-    buf_decode(it, &info->main_hand, 1);
+    byte_decode(it, &info->main_hand);
     //允许过滤标志和书名上的文本。
-    buf_decode(it, &info->text_filtering, sizeof(bool));
+    boolean_decode(it, &info->text_filtering);
     //允许被显示在服务器列表中
-    buf_decode(it, &info->allow_serverlistings, sizeof(bool));
+    boolean_decode(it, &info->allow_serverlistings);
 
     reply_FinishConfiguration(data);
 }
@@ -254,10 +254,10 @@ void reply_FinishConfiguration(struct ClientData* data){
 }
 
 void handler_ServerboundPluginMessage(struct ClientData* data){
-    Iterator* it = &data->connect.original_message;
-    Iterator channel;
+    Data* it = &data->connect.original_message;
+    Data channel;
     string_decode(it, &channel, 32767);
-    Iterator channel_data;
+    Data channel_data;
     string_decode(it, &channel_data, 32767);
 
     reply_ClientboundPluginMessage(data);
@@ -280,7 +280,7 @@ void handler_AcknowledgeFinishConfiguration(struct ClientData* data){
 //游玩状态 CLIENT_STATUS_PLAYING
 
 void handler_ConfirmTeleportation(struct ClientData* data){
-    Iterator* it = &data->connect.original_message;
+    Data* it = &data->connect.original_message;
     //varint_decode(it, &data->connect.teleport_id);
     reply_GameEvent(data);
 }

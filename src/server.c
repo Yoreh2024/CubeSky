@@ -7,39 +7,39 @@ void event_read(struct bufferevent* bev, void* client_data) {
 
         uint32_t datalen = 0;
         //上轮是否处理了完整消息（是否有消息残余）
-        if(data->connect.original_message.length == 0){
+        if(data->connect.original_message.len == 0){
             char tmpbuf_datalen[5];
 
             ssize_t tmp = evbuffer_copyout(input, tmpbuf_datalen, 5);
 
-            Iterator tmpbuf_tmp={
-                .data=tmpbuf_datalen,
+            Data tmpbuf_tmp={
+                .p=tmpbuf_datalen,
                 .pos=tmpbuf_datalen,
-                .length=tmp
+                .len=tmp
             };
             varint_decode(&tmpbuf_tmp, &datalen);
             printf("数据长度:%d\n", datalen);
 
-            evbuffer_drain(input, tmpbuf_tmp.pos-tmpbuf_tmp.data);
+            evbuffer_drain(input, tmpbuf_tmp.pos-tmpbuf_tmp.p);
             
 
             if(evbuffer_get_length(input) < datalen){
                 if(datalen == 0 || datalen > MAX_DATALEN){
                     printf("数据长度不合法\n");
                     bufferevent_flush(bev, EV_READ, BEV_FLUSH);
-                    data->connect.original_message.length = 0;
+                    data->connect.original_message.len = 0;
                     bufferevent_setwatermark(bev, EV_READ, 0, 0);
                     return;
                 }
 
                 printf("缓冲区数据长度:%d\n", evbuffer_get_length(input));
-                data->connect.original_message.length = datalen;
+                data->connect.original_message.len = datalen;
                 bufferevent_setwatermark(bev, EV_READ, datalen, 0);
                 return;
             }
         }else{
             //上一轮解析出的数据长度
-            datalen = data->connect.original_message.length;
+            datalen = data->connect.original_message.len;
         }
         
         char* buf = (char*)mi_malloc(datalen);
@@ -49,9 +49,9 @@ void event_read(struct bufferevent* bev, void* client_data) {
         hex_decode(buf, datalen, tmp);
         printf("收到客户端发来的数据：%s\n", tmp);
 
-        data->connect.original_message.data = buf;
+        data->connect.original_message.p = buf;
         data->connect.original_message.pos = buf;
-        data->connect.original_message.length = datalen;
+        data->connect.original_message.len = datalen;
         //接收消息并处理
         clientdata_handler(data);
         //如果有数据需要发送
@@ -65,7 +65,7 @@ void event_read(struct bufferevent* bev, void* client_data) {
         
         mi_free(buf);
         bufferevent_setwatermark(bev, EV_READ, 0, 0);
-        data->connect.original_message.length = 0;
+        data->connect.original_message.len = 0;
     }
     
 }

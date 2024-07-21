@@ -7,6 +7,9 @@
 #include "common.h"
 #include <yyjson.h>
 
+#ifndef CODEC_H
+#define CODEC_H
+
 typedef bool Boolean;
 typedef int8_t Byte;
 typedef uint8_t UnsignedByte;
@@ -53,14 +56,14 @@ typedef Data ByteArray;
 
 bool hex_decode(const uint8_t *data, uint8_t length, char* hex_str);
 
-bool void_decode(Iterator* it, Data* out, uint16_t len);
-bool string_decode(Iterator* it, Data* out, int32_t maxlen);
-bool varint_decode(Iterator* it, VarInt* out);
-bool varlong_decode(Iterator* it, VarLong* out); 
+uint32_t void_decode(Data* it, void* out, uint16_t len);
+bool string_decode(Data* it, Data* out, int32_t maxlen);
+bool varint_decode(Data* it, VarInt* out);
+bool varlong_decode(Data* it, VarLong* out); 
 
-bool void_encode(Iterator* it, void* out, uint16_t len);
+bool void_encode(Data* it, void* out, uint16_t len);
 bool string_encode(struct evbuffer* buf, const char* ptr);
 bool varint_encode(struct evbuffer* buf, int32_t value);
 bool varint_encode_prepend(struct evbuffer* buf, int32_t value);
 
-
+#endif

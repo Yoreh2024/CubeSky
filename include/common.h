@@ -37,7 +37,7 @@ extern struct ServerData ServerData;
 extern struct ServerModules ServerModules;
 
 typedef struct{
-    const char* p;
+    char* p;
     uint32_t len;
     char* pos;
 }Data;

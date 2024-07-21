@@ -1,15 +1,15 @@
 #include "codec.h"
 
-bool void_decode(Data* it, Data* out, uint16_t len){
+uint32_t void_decode(Data* it, void* out, uint16_t len){
     if(len > (it->p + it->len - it->pos)){
-        return ;
+        return false;
     }
     memcpy(out, it->pos, len);
     it->pos+=len;
     return true;
 }
 
-Data varint_decode(Data* it, int32_t* out) {
+bool varint_decode(Data* it, int32_t* out) {
     char* start = it->pos;
     const unsigned char* end = it->p + it->len;
     int32_t value = 0;
@@ -30,7 +30,7 @@ Data varint_decode(Data* it, int32_t* out) {
     return true;
 }
 
-Data varint_encode(struct evbuffer* buf, int32_t value) {
+bool varint_encode(struct evbuffer* buf, int32_t value) {
     char tmp[5];
     char* start = tmp;
     while (value >= 0x80) {
@@ -41,7 +41,7 @@ Data varint_encode(struct evbuffer* buf, int32_t value) {
     evbuffer_add(buf, &tmp, start-tmp);
     return true;
 }
-Data varint_encode_prepend(struct evbuffer* buf, int32_t value){
+bool varint_encode_prepend(struct evbuffer* buf, int32_t value){
     char tmp[5];
     char* start = tmp;
     while (value >= 0x80) {
@@ -53,9 +53,9 @@ Data varint_encode_prepend(struct evbuffer* buf, int32_t value){
     return true;
 }
 
-Data varlong_decode(Data* it, int64_t* out) {
+bool varlong_decode(Data* it, int64_t* out) {
     char* start = it->pos;
-    const unsigned char* end = it->data + it->length;
+    const unsigned char* end = it->p + it->len;
     int64_t value = 0;
     uint8_t shift = 0;
 
@@ -82,22 +82,22 @@ bool hex_decode(const uint8_t *data, uint8_t length, char* hex_str) {
     return true;
 }
 
-Data string_decode(Data* it, Data* out, int32_t maxlen) {
+bool string_decode(Data* it, Data* out, int32_t maxlen) {
     int32_t len;
     varint_decode(it, &len);
-    if ((len > (it->data + it->length - it->pos)) || len < -1 || ( maxlen != -1 && len > maxlen)){
+    if ((len > (it->p + it->len - it->pos)) || len < -1 || ( maxlen != -1 && len > maxlen)){
         return false;
     }
     
-    out->data = it->pos;
+    out->p = it->pos;
     out->pos = it->pos;
-    out->length = len;
+    out->len = len;
     it->pos += len;
 
     return true;
 }
 
-Data string_encode(struct evbuffer* buf, const char* ptr) {
+bool string_encode(struct evbuffer* buf, const char* ptr) {
     size_t len = strlen(ptr);
     varint_encode(buf, len);
     evbuffer_add(buf, ptr, len);
