@@ -31,8 +31,8 @@ typedef struct {
 } ClientInfo;
 
 struct connect{
+    struct bufferevent* bev;
     Data original_message;
-    struct evbuffer *send_buffer;
     ClientStatus status;
     int32_t protocol_ver;
     unsigned short server_port;

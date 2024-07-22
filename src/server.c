@@ -1,5 +1,6 @@
 #include "server.h"
 void event_read(struct bufferevent* bev, void* client_data) {
+    ((struct ClientData*)client_data)->connect.bev = bev;
     struct evbuffer *input = bufferevent_get_input(bev);
 
     while(evbuffer_get_length(input) != 0){
@@ -53,15 +54,7 @@ void event_read(struct bufferevent* bev, void* client_data) {
         data->connect.original_message.pos = buf;
         data->connect.original_message.len = datalen;
         //接收消息并处理
-        clientdata_handler(data);
-        //如果有数据需要发送
-        if(data->connect.send_buffer != NULL){
-            int32_t send_datalen = evbuffer_get_length(data->connect.send_buffer);
-            varint_encode_prepend(data->connect.send_buffer, send_datalen);
-            bufferevent_write_buffer(bev, data->connect.send_buffer);
-            evbuffer_free(data->connect.send_buffer);
-            data->connect.send_buffer=NULL;
-        }
+        cs_handler(data);
         
         mi_free(buf);
         bufferevent_setwatermark(bev, EV_READ, 0, 0);

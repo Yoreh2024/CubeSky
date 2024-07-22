@@ -1,6 +1,6 @@
 #include "codec.h"
 
-uint32_t void_decode(Data* it, void* out, uint16_t len){
+bool void_decode(Data* it, void* out, uint16_t len){
     if(len > (it->p + it->len - it->pos)){
         return false;
     }

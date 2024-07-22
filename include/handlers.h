@@ -1,12 +1,13 @@
 #include <stdbool.h>
 #include <string.h>
 #include <stdio.h>
+#include <event2/bufferevent.h>
 #include <event2/buffer.h>
 #include "typedefine.h"
 #include "codec.h"
 #include "common.h"
 
-void clientdata_handler(struct ClientData* data);
+void cs_handler(struct ClientData* data);
 void handler_Handshake(struct ClientData* data);
 void handler_EncryptionResponse(struct ClientData* data);
 void reply_EncryptionRequest(struct ClientData* data);
@@ -25,3 +26,4 @@ void reply_FinishConfiguration(struct ClientData* data);
 void handler_ConfirmTeleportation(struct ClientData* data);
 void reply_GameEvent(struct ClientData* data);
 void reply_SynchronizePlayerPosition(struct ClientData* data);
+void reply_PingResponse(struct ClientData* data);

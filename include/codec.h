@@ -10,6 +10,8 @@
 #ifndef CODEC_H
 #define CODEC_H
 
+bool hex_decode(const uint8_t *data, uint8_t length, char* hex_str);
+
 typedef bool Boolean;
 typedef int8_t Byte;
 typedef uint8_t UnsignedByte;
@@ -41,6 +43,11 @@ typedef Data Array;
 typedef Data Enum;
 typedef Data ByteArray;
 
+bool void_decode(Data* it, void* out, uint16_t len);
+bool string_decode(Data* it, Data* out, int32_t maxlen);
+bool varint_decode(Data* it, VarInt* out);
+bool varlong_decode(Data* it, VarLong* out); 
+
 #define boolean_decode(it, out) void_decode(it, out, sizeof(Boolean))
 #define byte_decode(it, out) void_decode(it, out, sizeof(Byte))
 #define unsignedbyte_decode(it, out) void_decode(it, out, sizeof(UnsignedByte))
@@ -54,16 +61,21 @@ typedef Data ByteArray;
 #define angle_decode(it, out) void_decode(it, out, sizeof(Angle))
 #define uuid_decode(it, out) void_decode(it, out, sizeof(UUID))
 
-bool hex_decode(const uint8_t *data, uint8_t length, char* hex_str);
-
-uint32_t void_decode(Data* it, void* out, uint16_t len);
-bool string_decode(Data* it, Data* out, int32_t maxlen);
-bool varint_decode(Data* it, VarInt* out);
-bool varlong_decode(Data* it, VarLong* out); 
-
-bool void_encode(Data* it, void* out, uint16_t len);
 bool string_encode(struct evbuffer* buf, const char* ptr);
 bool varint_encode(struct evbuffer* buf, int32_t value);
 bool varint_encode_prepend(struct evbuffer* buf, int32_t value);
+
+#define boolean_encode(it, ptr) evbuffer_add(it, ptr, sizeof(Boolean))
+#define byte_encode(it, ptr) evbuffer_add(it, ptr, sizeof(Byte))
+#define unsignedbyte_encode(it, ptr) evbuffer_add(it, ptr, sizeof(UnsignedByte))
+#define short_encode(it, ptr) evbuffer_add(it, ptr, sizeof(Short))
+#define unsignedshort_encode(it, ptr) evbuffer_add(it, ptr, sizeof(UnsignedShort))
+#define int_encode(it, ptr) evbuffer_add(it, ptr, sizeof(Int))
+#define long_encode(it, ptr) evbuffer_add(it, ptr, sizeof(Long))
+#define float_encode(it, ptr) evbuffer_add(it, ptr, sizeof(Float))
+#define double_encode(it, ptr) evbuffer_add(it, ptr, sizeof(Double))
+#define position_encode(it, ptr) evbuffer_add(it, ptr, sizeof(Position))
+#define angle_encode(it, ptr) evbuffer_add(it, ptr, sizeof(Angle))
+#define uuid_encode(it, ptr) evbuffer_add(it, ptr, sizeof(UUID))
 
 #endif
